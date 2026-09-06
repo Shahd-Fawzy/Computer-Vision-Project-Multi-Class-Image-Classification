@@ -147,13 +147,22 @@ predicted_class, confidence, probabilities = predict_image(
     class_names=class_names,
     rescale=False               # EfficientNetB0 expects raw 0-255 input
 )
+
 **8.Key Design Decisions**
+
 Manual 70/15/15 split instead of the dataset's provided seg_train/seg_test folders, to control the exact split ratio and keep the split stratified by class.
+
 Two separate augmentation pipelines (one per image resolution) rather than one shared pipeline, to avoid input-shape conflicts between the 150×150 baseline model and the 224×224 transfer-learning model.
+
 Augmentation applied inside the tf.data pipeline, not inside the model itself — this keeps the training=True behavior explicit in code rather than relying on Keras to infer it, and avoids the augmentation layer's input shape becoming permanently locked to whichever model first used it.
+
 Lower learning rate (3e-4) + ReduceLROnPlateau for the baseline CNN, after an initial run at 1e-3 produced unstable, oscillating validation accuracy across epochs.
-9. Limitations & Future Improvements
+
+**9. Limitations & Future Improvements**
+
 Only the top 20 layers of EfficientNetB0 were unfrozen during fine-tuning; unfreezing more layers (with careful learning-rate scheduling) could potentially improve accuracy further.
+
 No explainability technique (e.g. Grad-CAM) is currently included — adding one would help visualize which parts of glacier/mountain images the model finds ambiguous.
 No deployment interface (e.g. Streamlit) is included yet.
+
 More training data, or targeted data augmentation for the glacier/mountain classes specifically, could help close the remaining gap in their F1-scores.
